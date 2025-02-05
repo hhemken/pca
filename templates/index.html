@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PCA Analysis</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .results {
+            display: none;
+        }
+        .plot {
+            margin: 20px 0;
+            text-align: center;
+        }
+        .plot img {
+            max-width: 100%;
+            height: auto;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .error {
+            color: red;
+            margin: 10px 0;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>PCA Analysis Tool</h1>
+
+    <div class="container">
+        <h2>Upload Dataset</h2>
+        <p>Please upload a CSV file with 13 feature columns and 1 label column (last column).</p>
+        <form id="uploadForm">
+            <input type="file" id="fileInput" accept=".csv" required>
+            <button type="submit">Perform PCA</button>
+        </form>
+        <div id="error" class="error"></div>
+        <div id="loading" class="loading">
+            Processing... Please wait.
+        </div>
+    </div>
+
+    <div id="results" class="results">
+        <div class="container">
+            <h2>Explained Variance Ratio</h2>
+            <p>Component 1: <span id="variance1"></span></p>
+            <p>Component 2: <span id="variance2"></span></p>
+        </div>
+
+        <div class="container">
+            <h2>PCA Visualization</h2>
+            <div class="plot">
+                <img id="pcaPlot" alt="PCA Plot">
+            </div>
+        </div>
+
+        <div class="container">
+            <h2>Training Set Results</h2>
+            <div class="plot">
+                <img id="trainPlot" alt="Training Set Plot">
+            </div>
+        </div>
+
+        <div class="container">
+            <h2>Test Set Results</h2>
+            <div class="plot">
+                <img id="testPlot" alt="Test Set Plot">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                showError('Please select a file');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // Show loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+
+            fetch('/perform_pca', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showError(data.error);
+                    return;
+                }
+
+                // Hide loading
+                document.getElementById('loading').style.display = 'none';
+
+                // Show results
+                document.getElementById('results').style.display = 'block';
+
+                // Update variance ratios
+                document.getElementById('variance1').textContent =
+                    (data.explained_variance[0] * 100).toFixed(2) + '%';
+                document.getElementById('variance2').textContent =
+                    (data.explained_variance[1] * 100).toFixed(2) + '%';
+
+                // Update plots
+                document.getElementById('pcaPlot').src = 'data:image/png;base64,' + data.pca_plot;
+                document.getElementById('trainPlot').src = 'data:image/png;base64,' + data.train_plot;
+                document.getElementById('testPlot').src = 'data:image/png;base64,' + data.test_plot;
+            })
+            .catch(error => {
+                showError('An error occurred while processing the request');
+                console.error('Error:', error);
+            });
+        });
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            document.getElementById('loading').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
