@@ -14,6 +14,7 @@ This Flask web application performs Principal Component Analysis (PCA) on upload
 - Display of explained variance ratios
 - Interactive web interface
 - Real-time processing and visualization
+- Comprehensive test suite with synthetic and real data
 
 ## Prerequisites
 
@@ -48,12 +49,21 @@ pip install -r requirements.txt
 
 ```
 pca-flask-app/
-├── app.py              # Main Flask application
-├── requirements.txt    # Project dependencies
-├── README.md          # Project documentation
-├── templates/         # HTML templates
-│   └── index.html    # Main web interface
-└── uploads/          # Temporary folder for file uploads
+├── app.py                  # Main Flask application
+├── requirements.txt        # Project dependencies
+├── README.md              # Project documentation
+├── pytest.ini             # Pytest configuration
+├── templates/             # HTML templates
+│   └── index.html         # Main web interface
+├── uploads/               # Temporary folder for file uploads
+└── tests/                 # Test suite directory
+    ├── __init__.py
+    ├── conftest.py        # Test configurations and fixtures
+    ├── test_pca.py        # Test cases
+    ├── export_wine_data.py # Utility to export test data
+    └── test_data/         # Test datasets directory
+        ├── test_dataset.csv   # Auto-generated synthetic data
+        └── wine_test_data.csv # Real wine dataset for testing
 ```
 
 ## Usage
@@ -78,6 +88,59 @@ http://localhost:5000
    - The application will display the explained variance ratio
    - Three visualizations will be generated
    - Results are displayed without page reload
+
+## Testing
+
+### Setting Up the Test Environment
+
+1. Test data preparation:
+```bash
+# Generate the wine dataset for testing
+python tests/export_wine_data.py
+```
+
+2. Run the tests:
+```bash
+# Run all tests
+pytest
+
+# Run with verbose output
+pytest -v
+
+# Run with coverage report
+pytest --cov=.
+
+# Run specific test file
+pytest tests/test_pca.py
+```
+
+### Test Suite Components
+
+1. **Synthetic Data Tests**
+   - Automatically generates test data
+   - Validates PCA transformation
+   - Tests classification accuracy
+   - Verifies data loading and preprocessing
+
+2. **Real Data Tests**
+   - Uses scikit-learn's wine dataset
+   - Validates against known good data
+   - Tests end-to-end functionality
+   - Verifies model performance
+
+3. **Flask Application Tests**
+   - Tests all endpoints
+   - Validates file uploads
+   - Verifies JSON responses
+   - Tests visualization generation
+
+### Test Configuration
+
+The `pytest.ini` file includes settings for:
+- Test discovery patterns
+- Verbosity levels
+- Custom markers for integration and slow tests
+- Strict marker checking
 
 ## Input Data Format
 
@@ -115,6 +178,21 @@ The application generates three types of plots:
    - Shows model performance on unseen data
    - Helps identify potential overfitting
 
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Add tests for new features
+4. Run the test suite to ensure everything passes
+5. Submit a pull request
+
+### Development Guidelines
+
+- Write tests for all new features
+- Maintain test coverage above 80%
+- Follow PEP 8 style guidelines
+- Update documentation as needed
+
 ## Error Handling
 
 The application includes error handling for common issues:
@@ -124,14 +202,6 @@ The application includes error handling for common issues:
 - Server-side exceptions
 
 Error messages will be displayed in the web interface.
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
 
 ## License
 
@@ -143,10 +213,15 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Flask for the web framework
 - Matplotlib for visualization capabilities
 - NumPy and Pandas for data handling
+- UCI Machine Learning Repository for the wine dataset
 
 ## Support
 
-For support, please open an issue in the repository or contact the maintainers.
+For support, please:
+1. Check existing issues in the repository
+2. Run tests to verify if the issue is reproducible
+3. Open a new issue with test results if needed
+4. Contact the maintainers
 
 ## Future Enhancements
 
@@ -159,3 +234,4 @@ Planned features for future releases:
 - Batch processing of multiple files
 - Custom parameter tuning
 - Additional visualization options
+- Support for more dataset formats
